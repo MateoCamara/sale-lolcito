@@ -10,7 +10,7 @@ POLL_INTERVAL = 15  # segundos entre cada consulta
 LOL_LOCKFILE_PATH = r"C:\Riot Games\League of Legends\lockfile"
 
 # --- Servicio de mensajería: "telegram" o "whatsapp" ---
-MESSAGING_SERVICE = "telegram"
+MESSAGING_SERVICE = "clipboard"
 
 # Telegram
 TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "")

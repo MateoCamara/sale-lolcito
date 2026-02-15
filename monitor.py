@@ -8,6 +8,8 @@ from lcu import is_client_running, get_lockfile, get_friends
 
 if MESSAGING_SERVICE == "telegram":
     from telegram_client import send_telegram as send_message
+elif MESSAGING_SERVICE == "clipboard":
+    from clipboard_client import send_clipboard as send_message
 else:
     from whatsapp_client import send_whatsapp as send_message
 

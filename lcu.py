@@ -34,3 +34,24 @@ def get_friends(port, password):
     resp = requests.get(url, auth=("riot", password), verify=False)
     resp.raise_for_status()
     return resp.json()
+
+
+def get_last_match_result(port, password, puuid):
+    """Consulta el historial y devuelve 'win', 'loss' o None."""
+    try:
+        url = f"https://127.0.0.1:{port}/lol-match-history/v1/products/lol/{puuid}/matches"
+        resp = requests.get(
+            url, auth=("riot", password), verify=False,
+            params={"begIndex": 0, "endIndex": 1},
+        )
+        resp.raise_for_status()
+        games = resp.json().get("games", {}).get("games", [])
+        if not games:
+            return None
+        won = games[0].get("participants", [{}])[0].get("stats", {}).get("win")
+        if won is None:
+            return None
+        return "win" if won else "loss"
+    except Exception as e:
+        print(f"  Error consultando historial: {e}")
+        return None

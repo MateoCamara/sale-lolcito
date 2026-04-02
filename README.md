@@ -16,10 +16,11 @@ El bot se conecta a la API local del cliente de League of Legends (la LCU API) y
 - `🔍 Mejill0n está buscando partida (Ranked Solo/Duo)`
 - `🧙 Mejill0n está en selección de campeón (Ranked Solo/Duo)`
 - `🎮 Mejill0n ha entrado en partida! (Milio - Ranked Solo/Duo)`
-- `🏁 Mejill0n ha salido de partida`
+- `🏆 Mejill0n ha GANADO la partida!`
+- `💀 Mejill0n ha PERDIDO la partida`
 - `🔴 Mejill0n se ha desconectado`
 
-Sí, te dice hasta el campeón y el tipo de cola. No hay escapatoria.
+Sí, te dice hasta el campeón, el tipo de cola y si ha ganado o perdido. No hay escapatoria.
 
 ## Cómo lo monto?
 

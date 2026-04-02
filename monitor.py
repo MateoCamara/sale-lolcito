@@ -4,7 +4,7 @@ import time
 sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
 from config import FRIENDS, POLL_INTERVAL, LOL_LOCKFILE_PATH, MESSAGING_SERVICE
-from lcu import is_client_running, get_lockfile, get_friends
+from lcu import is_client_running, get_lockfile, get_friends, get_last_match_result
 
 if MESSAGING_SERVICE == "telegram":
     from telegram_client import send_telegram as send_message
@@ -31,6 +31,7 @@ def get_status(friend):
     """Extrae el estado resumido de un amigo de la LCU API."""
     lol = friend.get("lol", {})
     return {
+        "puuid": friend.get("puuid", ""),
         "availability": friend.get("availability", "offline"),
         "gameStatus": lol.get("gameStatus", ""),
         "champion": lol.get("skinname", ""),
@@ -94,9 +95,32 @@ def detect_changes(prev, curr):
             suffix = f" ({info})" if info else ""
             messages.append(f"\U0001f3ae {name} ha entrado en partida!{suffix}")
         elif not is_in_game and was_in_game and not is_offline:
-            messages.append(f"\U0001f3c1 {name} ha salido de partida")
+            puuid = new.get("puuid", "")
+            messages.append(("game_end", name, puuid))
 
     return messages
+
+
+GAME_END_DELAY = 15  # segundos para que el historial se actualice
+
+
+def resolve_game_end(port, password, name, puuid):
+    """Espera y consulta el resultado de la última partida."""
+    if not puuid:
+        return f"\U0001f3c1 {name} ha salido de partida"
+
+    time.sleep(GAME_END_DELAY)
+    result = get_last_match_result(port, password, puuid)
+
+    if result is None:
+        time.sleep(10)
+        result = get_last_match_result(port, password, puuid)
+
+    if result == "win":
+        return f"\U0001f3c6 {name} ha GANADO la partida!"
+    elif result == "loss":
+        return f"\U0001f480 {name} ha PERDIDO la partida"
+    return f"\U0001f3c1 {name} ha salido de partida"
 
 
 def build_state(friends_list):
@@ -148,8 +172,13 @@ def main():
         if prev_state:
             messages = detect_changes(prev_state, curr_state)
             for msg in messages:
-                send_message(msg)
-                print(f">> {msg}")
+                if isinstance(msg, tuple) and msg[0] == "game_end":
+                    _, friend_name, puuid = msg
+                    text = resolve_game_end(port, password, friend_name, puuid)
+                else:
+                    text = msg
+                send_message(text)
+                print(f">> {text}")
         else:
             print("Estado inicial capturado:")
             for name, status in curr_state.items():
